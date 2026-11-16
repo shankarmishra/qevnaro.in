@@ -1,9 +1,96 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/services/app-development",
+      "destination": "/services/mobile-app-development",
+      "permanent": true
+    },
+    {
+      "source": "/services/social-media",
+      "destination": "/services/social-media-marketing",
+      "permanent": true
+    },
+    {
+      "source": "/services/ui-design",
+      "destination": "/services/ui-ux-design",
+      "permanent": true
+    },
+    {
+      "source": "/solutions/e-commerce",
+      "destination": "/services/ecommerce-development",
+      "permanent": true
+    },
+    {
+      "source": "/solutions/lead-generation",
+      "destination": "/services/performance-marketing",
+      "permanent": true
+    },
+    {
+      "source": "/solutions/brand-identity",
+      "destination": "/services/branding",
+      "permanent": true
+    },
+    {
+      "source": "/portfolio",
+      "destination": "/work",
+      "permanent": true
+    },
+    {
+      "source": "/case-studies/pulsencare",
+      "destination": "/work/pulsencare",
+      "permanent": true
+    },
+    {
+      "source": "/case-studies/menusqr",
+      "destination": "/work/menusqr",
+      "permanent": true
+    },
+    {
+      "source": "/industries/edtech",
+      "destination": "/industries/education",
+      "permanent": true
+    },
+    {
+      "source": "/industries/retail-ecommerce",
+      "destination": "/industries/ecommerce-retail",
+      "permanent": true
+    },
+    {
+      "source": "/industries/manufacturing",
+      "destination": "/industries/manufacturing-b2b",
+      "permanent": true
+    },
+    {
+      "source": "/industries/fintech",
+      "destination": "/industries/finance-consulting",
+      "permanent": true
+    },
+    {
+      "source": "/lab/agents-at-work",
+      "destination": "/agents-at-work",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
-      "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "source": "/assets/(.*)-([A-Za-z0-9_-]{8})\\.(js|css|woff2)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)\\.(webp|avif|jpg|png|svg)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
     }
   ]
 }

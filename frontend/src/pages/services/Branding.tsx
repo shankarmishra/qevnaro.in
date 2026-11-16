@@ -78,7 +78,7 @@ const DATA: ServicePageData = {
   ],
   relatedCaseStudies: [
     { title: 'PulsenCare', desc: 'A brand and product build from our portfolio.', href: '/work/pulsencare', tag: 'Case study' },
-    { title: 'MenuSQR', desc: 'A brand and product build from our portfolio.', href: '/work/menusqr', tag: 'Case study' }
+    { title: 'MenusQR', desc: 'A brand and product build from our portfolio.', href: '/work/menusqr', tag: 'Case study' }
   ],
   relatedServices: [
     { title: 'UI/UX Design', desc: 'Apply the brand to digital products.', href: '/services/ui-ux-design' },

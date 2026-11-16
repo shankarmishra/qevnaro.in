@@ -410,7 +410,7 @@ export const AgentsSwarmEngine: React.FC<AgentsSwarmEngineProps> = ({
           >
             {/* Live Dimension & Agent Tag */}
             <span
-              className="absolute -top-7 left-0 rounded px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-ink shadow-md"
+              className="absolute -top-7 left-0 rounded px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-canvas shadow-md"
               style={{ backgroundColor: m.agentColor }}
             >
               {m.agentName} · {Math.round(m.w)} × {Math.round(m.h)} px
@@ -450,7 +450,7 @@ export const AgentsSwarmEngine: React.FC<AgentsSwarmEngineProps> = ({
                 color: c.textColor,
               }}
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+              <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
               {c.name}
             </span>
           </div>

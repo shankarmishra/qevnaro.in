@@ -634,11 +634,7 @@ export const LineArt: React.FC<{ kind: LineArtKind; className?: string }> = ({
       style={{ touchAction: 'pan-y' }}
       className={`relative text-fg-soft [perspective:900px] select-none ${className}`}
     >
-      {/* Subtle Cyan/Blue Optical Radial Glow Backdrop */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-brand-blue/10 blur-3xl opacity-60"
-        aria-hidden="true"
-      />
+      
 
       <motion.svg
         viewBox="0 0 400 320"

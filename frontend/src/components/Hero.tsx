@@ -1,194 +1,261 @@
-import React, { useRef, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import { Button } from './ui/Button';
 import { Magnetic } from './ui/Magnetic';
-import { HeroShader } from './ui/HeroShader';
-import { HeroEngineeringCockpit } from './hero/HeroEngineeringCockpit';
-import { EASE } from '../lib/motion';
+import { Eyebrow } from './ui/Reveal';
+import { SplitText } from './ui/SplitText';
+import { DUR, EASE } from '../lib/motion';
+import { useMedia } from '../lib/useVisible';
 
-const LINES: { text: string; accent?: boolean }[] = [
-  { text: 'We build digital' },
-  { text: 'experiences that' },
-  { text: 'drive growth.', accent: true },
+const HeroCanvas = lazy(() => import('./hero/HeroCanvas'));
+
+const POSTER = '/assets/hero/poster.webp';
+const POSTER_MOBILE = '/assets/hero/poster-mobile.webp';
+
+const CHAPTERS = [
+  { at: [0.2, 0.27, 0.42, 0.48], n: '01', label: 'Build', title: 'Designed and engineered in-house.', body: 'Websites, apps and stores, from first sketch to launch, by one team.' },
+  { at: [0.5, 0.56, 0.71, 0.77], n: '02', label: 'Grow', title: 'Search, ads and content that compound.', body: 'SEO, AI search, paid campaigns and social, measured against enquiries.' },
+  { at: [0.8, 0.86, 1, 1], n: '03', label: 'Automate', title: 'AI agents that take over the busywork.', body: 'Follow-ups, support and reporting handled, with a person in the loop.' },
 ];
 
-const MARQUEE = [
-  'Enterprise Web Platforms',
-  'Cross-Platform Mobile Apps',
-  'Autonomous AI Agent Pipelines',
-  'Full-Funnel Growth Infrastructure',
-  'Edge Cloud Architecture',
-  'Real-Time Telemetry & Systems',
-];
+const Chapter: React.FC<{ c: (typeof CHAPTERS)[number]; p: MotionValue<number> }> = ({ c, p }) => {
+  const opacity = useTransform(p, c.at, [0, 1, 1, 0]);
+  const y = useTransform(p, [c.at[0], c.at[1]], [36, 0]);
+  const clip = useTransform(p, [c.at[0], c.at[1]], ['inset(0 100% 0 0)', 'inset(0 0% 0 0)']);
+  const fill = useTransform(p, [c.at[1], c.at[2]], [0, 1]);
+  return (
+    <motion.div style={{ opacity, y }} className="absolute bottom-0 left-0 max-w-[40rem]" aria-hidden="true">
+      <div className="flex items-center gap-4">
+        <span className="serif-accent text-6xl leading-none text-brand-blue sm:text-7xl">{c.n}</span>
+        <span className="relative block h-px w-16 overflow-hidden bg-line-strong">
+          <motion.span style={{ scaleX: fill }} className="absolute inset-0 origin-left bg-brand-navy" />
+        </span>
+        <span className="t-micro text-fg-muted">{c.label}</span>
+      </div>
+      <motion.p style={{ clipPath: clip }} className="t-h1 mt-5 text-fg">{c.title}</motion.p>
+      <p className="mt-4 max-w-md text-[15px] leading-relaxed text-fg-soft">{c.body}</p>
+    </motion.div>
+  );
+};
+
+/** If WebGL is unavailable the canvas throws; show the poster instead. */
+class CanvasBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode; onFail: () => void },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onFail();
+  }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+/** A still of the scene. Shown first, and kept wherever the live scene does not load. */
+const Poster: React.FC = () => (
+  <picture>
+    <source media="(max-width: 767px)" srcSet={POSTER_MOBILE} />
+    <img
+      src={POSTER}
+      alt=""
+      width={1600}
+      height={1000}
+      fetchPriority="low"
+      className="absolute inset-0 h-full w-full object-cover"
+      aria-hidden="true"
+    />
+  </picture>
+);
+
+/**
+ * When to start the live 3D scene. Desktop: once the browser is idle after first paint.
+ * Phones and tablets: on the first scroll or touch, so the 1 MB scene never competes with
+ * the first paint on a mobile connection.
+ */
+function useStartScene() {
+  const [start, setStart] = useState(false);
+  useEffect(() => {
+    const desktop = window.matchMedia('(pointer: fine) and (min-width: 1024px)').matches;
+    const go = () => setStart(true);
+    if (desktop) {
+      const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
+      if (w.requestIdleCallback) w.requestIdleCallback(go, { timeout: 1200 });
+      else setTimeout(go, 600);
+      return;
+    }
+    const events = ['scroll', 'touchstart', 'pointerdown', 'keydown'] as const;
+    const once = () => {
+      events.forEach((e) => window.removeEventListener(e, once));
+      go();
+    };
+    events.forEach((e) => window.addEventListener(e, once, { passive: true }));
+    return () => events.forEach((e) => window.removeEventListener(e, once));
+  }, []);
+  return start;
+}
+
+/** True once the once-per-session brand intro has finished (or immediately when there is none). */
+function useIntroDone() {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    const d = document.documentElement;
+    if (!d.classList.contains('intro') || d.classList.contains('intro-done')) {
+      setDone(true);
+      return;
+    }
+    const on = () => setDone(true);
+    window.addEventListener('qev:intro-done', on);
+    const cap = setTimeout(on, 3200);
+    return () => {
+      window.removeEventListener('qev:intro-done', on);
+      clearTimeout(cap);
+    };
+  }, []);
+  return done;
+}
 
 export const Hero: React.FC = () => {
   const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  const fade = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const reduce = useMedia('(prefers-reduced-motion: reduce)');
+  const [ready, setReady] = useState(false);
+  const play = useIntroDone();
+  const start = useStartScene();
 
-  const [first] = useState(() => {
-    try {
-      if (sessionStorage.getItem('qev_hero_seen')) return false;
-      sessionStorage.setItem('qev_hero_seen', '1');
-      return true;
-    } catch {
-      return false;
-    }
+  const onReady = () => {
+    setReady(true);
+    window.dispatchEvent(new Event('qev:hero-ready'));
+  };
+
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] });
+  const introOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
+  const introY = useTransform(scrollYProgress, [0, 0.12], [0, -80]);
+  const introBlur = useTransform(scrollYProgress, [0, 0.12], ['blur(0px)', 'blur(6px)']);
+  const captionVeil = useTransform(scrollYProgress, [0.14, 0.24], [0, 1]);
+  const creditOpacity = useTransform(scrollYProgress, [0.24, 0.3, 0.42, 0.48], [0, 1, 1, 0]);
+
+  const enter = (delay: number) => ({
+    initial: { opacity: 0, y: 16 },
+    animate: play ? { opacity: 1, y: 0 } : undefined,
+    transition: { duration: DUR.slow, ease: EASE, delay },
   });
-  const d = first ? 0.8 : 0.05;
 
   return (
-    <section ref={ref} className="relative isolate flex min-h-[100svh] flex-col justify-between overflow-hidden border-b border-line bg-ink">
-      {/* Ambient shader backdrop */}
-      <motion.div style={{ scale }} className="absolute inset-0 -z-10" aria-hidden="true">
-        <HeroShader />
-        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-ink/90 via-ink/40 to-transparent lg:w-[60%]" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink to-transparent" />
-      </motion.div>
-
-      {/* Main Asymmetric Split Content */}
-      <motion.div
-        style={{ y, opacity: fade }}
-        className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 pb-8 pt-28 sm:px-6 lg:grid lg:grid-cols-12 lg:items-center lg:gap-10 lg:px-8 lg:pt-36"
-      >
-        {/* Left Column: High-Authority Messaging & Proof Metrics */}
-        <div className="flex min-w-0 w-full flex-col justify-center lg:col-span-7">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: d, ease: EASE }}
-            className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1 font-mono text-xs text-fg-soft"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-            </span>
-            Autonomous AI · Web Platforms · Digital Growth
-          </motion.div>
-
-          <h1
-            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-medium leading-[1.04] tracking-[-0.03em] text-fg"
-            aria-label="We build digital experiences that drive growth."
-          >
-            {LINES.map((l, i) => (
-              <span key={l.text} className="-mb-[0.12em] block overflow-hidden pb-[0.12em]" aria-hidden="true">
-                <motion.span
-                  className="block text-fg"
-                  initial={{ y: '112%', rotate: 1.5, opacity: 0 }}
-                  animate={{ y: 0, rotate: 0, opacity: 1 }}
-                  transition={{ duration: 0.9, delay: d + 0.1 + i * 0.1, ease: EASE }}
-                  style={{ transformOrigin: 'left bottom' }}
-                >
-                  {l.accent ? (
-                    <>
-                      drive <span className="serif-accent italic font-normal text-sky-400">growth.</span>
-                    </>
-                  ) : (
-                    l.text
-                  )}
-                </motion.span>
-              </span>
-            ))}
-          </h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: d + 0.45, ease: EASE }}
-            className="mt-6 max-w-full text-base leading-relaxed text-zinc-300 sm:text-lg lg:max-w-xl"
-          >
-            Qevnaro engineers resilient web platforms, autonomous AI agent workflows, and data-driven growth architectures designed for ambitious enterprise scale.
-          </motion.p>
-
-          {/* Factual Performance Proof Rail */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: d + 0.55, ease: EASE }}
-            className="mt-6 flex flex-wrap items-center gap-4 border-y border-white/5 py-3 font-mono text-xs text-zinc-400"
-          >
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-white tabular-nums">0.42s</span>
-              <span className="text-zinc-500">Median LCP</span>
-            </div>
-            <span className="h-3 w-px bg-white/10 hidden sm:block" />
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-white tabular-nums">99.99%</span>
-              <span className="text-zinc-500">Edge Uptime</span>
-            </div>
-            <span className="h-3 w-px bg-white/10 hidden sm:block" />
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-white tabular-nums">$42M+</span>
-              <span className="text-zinc-500">Revenue Impact</span>
-            </div>
-          </motion.div>
-
-          {/* Dual CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: d + 0.65, ease: EASE }}
-            className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
-          >
-            <Magnetic>
-              <Button to="/contact" size="lg" className="w-full sm:w-auto">
-                Start a Project
-              </Button>
-            </Magnetic>
-            <Magnetic>
-              <Button to="/services" variant="ghost" size="lg" className="group w-full sm:w-auto">
-                Explore Our Services
-                <ArrowUpRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Button>
-            </Magnetic>
-          </motion.div>
+    <section ref={ref} data-hero className={reduce ? 'relative' : 'relative h-[420vh]'} aria-label="Introduction">
+      <div className="sticky top-0 h-[100svh] min-h-[640px] overflow-hidden bg-canvas">
+        {/* Still frame first; the live scene fades in over it once it has rendered */}
+        <div className={`absolute inset-0 transition-opacity duration-1000 ${ready ? 'opacity-0' : 'opacity-100'}`} aria-hidden="true">
+          <Poster />
         </div>
 
-        {/* Right Column: Tangible Digital Engineering Cockpit */}
+        {/* Real-time scene: a glass Qevnaro mark, the camera passes through it into the work */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: d + 0.35, ease: EASE }}
-          className="flex w-full min-w-0 items-center justify-center lg:col-span-5"
+          className="absolute inset-0"
+          initial={{ opacity: 0, scale: 1.04 }}
+          animate={ready ? { opacity: 1, scale: 1 } : undefined}
+          transition={{ duration: 1.6, ease: EASE }}
+          aria-hidden="true"
         >
-          <HeroEngineeringCockpit />
+          {start && (
+            <CanvasBoundary fallback={<Poster />} onFail={onReady}>
+              <Suspense fallback={null}>
+                <HeroCanvas progress={scrollYProgress} still={reduce} onReady={onReady} />
+              </Suspense>
+            </CanvasBoundary>
+          )}
         </motion.div>
-      </motion.div>
 
-      {/* Capability Marquee */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: d + 0.8 }}
-        className="relative overflow-hidden border-t border-line bg-ink/60 py-3.5 backdrop-blur-md [mask-image:linear-gradient(to_right,transparent,#000_6%,#000_94%,transparent)]"
-        aria-label="Core capabilities"
-      >
-        <div className="animate-marquee flex w-max gap-8 whitespace-nowrap font-mono text-xs uppercase tracking-[0.16em] text-zinc-400">
-          {[...MARQUEE, ...MARQUEE, ...MARQUEE].map((t, i) => (
-            <span key={i} className="flex items-center gap-8">
-              <span>{t}</span>
-              <span className="h-1 w-1 rounded-full bg-sky-400/80" />
-            </span>
-          ))}
-        </div>
-      </motion.div>
+        {/* Veil that keeps the intro copy readable */}
+        <motion.div
+          style={reduce ? undefined : { opacity: introOpacity }}
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(250,250,247,0.97)_0%,rgba(250,250,247,0.9)_44%,rgba(250,250,247,0)_70%)] md:bg-[linear-gradient(90deg,rgba(250,250,247,0.95)_0%,rgba(250,250,247,0.75)_32%,rgba(250,250,247,0)_58%)]"
+          aria-hidden="true"
+        />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-canvas to-transparent" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-canvas to-transparent" aria-hidden="true" />
 
-      {/* Subtle Scroll Cue */}
-      <motion.a
-        href="#intro"
-        aria-label="Scroll to content"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: d + 1.0 }}
-        className="absolute bottom-16 right-8 hidden flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500 hover:text-zinc-300 lg:flex"
-      >
-        Scroll
-        <motion.span animate={{ y: [0, 5, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}>
-          <ArrowDown className="h-3.5 w-3.5" />
-        </motion.span>
-      </motion.a>
+        {/* Intro copy */}
+        <motion.div
+          style={reduce ? undefined : { opacity: introOpacity, y: introY, filter: introBlur }}
+          className="container-x absolute inset-x-0 top-[13svh] md:top-[19svh]"
+        >
+          <div className="max-w-[42rem]">
+            <motion.div {...enter(0.05)}>
+              <Eyebrow>
+                Technology &amp; growth agency<span className="hidden sm:inline"> · Noida · Bengaluru · Worldwide</span>
+              </Eyebrow>
+            </motion.div>
+
+            <SplitText
+              as="h1"
+              play={play}
+              delay={0.15}
+              text="Websites, apps and marketing, built by one team."
+              accent="one team."
+              className="t-display mt-6 text-fg"
+            />
+
+            <motion.p {...enter(0.85)} className="t-lead mt-7 max-w-[34rem] text-fg-soft">
+              Qevnaro designs and builds your website or app, then runs the SEO, ads and AI automation that
+              bring customers to it. One partner from first sketch to steady growth.
+            </motion.p>
+
+            <motion.div {...enter(1)} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Magnetic>
+                <Button to="/contact" size="lg" className="w-full sm:w-auto">Start a project</Button>
+              </Magnetic>
+              <Magnetic>
+                <Button to="/work" variant="outline" size="lg" className="w-full bg-canvas/80 backdrop-blur-sm sm:w-auto">
+                  See our work
+                </Button>
+              </Magnetic>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {!reduce && (
+          <>
+            {/* Soft veil behind the chapter captions */}
+            <motion.div
+              style={{ opacity: captionVeil }}
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_64%_60%_at_10%_95%,rgba(250,250,247,0.97)_0%,rgba(250,250,247,0.72)_45%,rgba(250,250,247,0)_72%)] max-md:bg-[linear-gradient(0deg,rgba(250,250,247,0.95)_0%,rgba(250,250,247,0.78)_26%,rgba(250,250,247,0)_46%)]"
+              aria-hidden="true"
+            />
+            {/* Chapter captions */}
+            <div className="container-x pointer-events-none absolute inset-x-0 bottom-[10svh]">
+              <div className="relative h-0">
+                {CHAPTERS.map((c) => (
+                  <Chapter key={c.n} c={c} p={scrollYProgress} />
+                ))}
+              </div>
+            </div>
+
+            {/* What is on the screens */}
+            <motion.p
+              style={{ opacity: creditOpacity }}
+              className="t-micro pointer-events-none absolute right-6 top-24 hidden max-w-[16rem] text-right text-fg-muted lg:right-10 lg:block"
+              aria-hidden="true"
+            >
+              On screen: Pulse n Care and MenusQR, two live products we built
+            </motion.p>
+
+            {/* Scroll dial */}
+            <motion.div
+              {...enter(1.2)}
+              className="pointer-events-none absolute bottom-8 right-6 hidden items-center gap-3 md:flex lg:right-10"
+              aria-hidden="true"
+            >
+              <span className="t-micro text-fg-muted">Scroll</span>
+              <span className="relative block h-px w-24 overflow-hidden bg-line-strong">
+                <motion.span style={{ scaleX: scrollYProgress }} className="absolute inset-0 origin-left bg-brand-navy" />
+              </span>
+            </motion.div>
+          </>
+        )}
+      </div>
     </section>
   );
 };

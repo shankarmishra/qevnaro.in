@@ -78,7 +78,7 @@ const DATA: ServicePageData = {
   ],
   relatedCaseStudies: [
     { title: 'PulsenCare', desc: 'A healthcare-focused digital product build from our portfolio.', href: '/work/pulsencare', tag: 'Case study' },
-    { title: 'MenuSQR', desc: 'A digital menu and ordering experience from our portfolio.', href: '/work/menusqr', tag: 'Case study' }
+    { title: 'MenusQR', desc: 'A digital menu and ordering experience from our portfolio.', href: '/work/menusqr', tag: 'Case study' }
   ],
   relatedServices: [
     { title: 'UI/UX Design', desc: 'Research-led interface design before development begins.', href: '/services/ui-ux-design' },

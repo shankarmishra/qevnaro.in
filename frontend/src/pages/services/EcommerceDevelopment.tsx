@@ -78,7 +78,7 @@ const DATA: ServicePageData = {
     { metric: 'Trackable', label: 'Revenue funnel', desc: 'Product views, carts and purchases measured so decisions use real data.' }
   ],
   relatedCaseStudies: [
-    { title: 'MenuSQR', desc: 'A digital menu and ordering experience from our portfolio.', href: '/work/menusqr', tag: 'Case study' },
+    { title: 'MenusQR', desc: 'A digital menu and ordering experience from our portfolio.', href: '/work/menusqr', tag: 'Case study' },
     { title: 'PulsenCare', desc: 'A digital product build from our portfolio.', href: '/work/pulsencare', tag: 'Case study' }
   ],
   relatedServices: [

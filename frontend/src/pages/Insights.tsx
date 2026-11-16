@@ -2,8 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Clock, Search } from 'lucide-react';
 import { SEO } from '../components/ui/SEO';
-import { Breadcrumbs } from '../components/ui/Breadcrumbs';
-import { Button } from '../components/ui/Button';
+import { PageHero } from '../components/ui/PageHero';
+import { FinalCTA } from '../components/home/FinalCTA';
+import { site } from '../lib/site';
 import { Reveal } from '../components/ui/Reveal';
 import { INSIGHTS, INSIGHT_CATEGORIES, formatDate, type InsightCategory } from '../data/insights';
 
@@ -29,31 +30,29 @@ export const Insights: React.FC = () => {
   const used = new Set(INSIGHTS.map((a) => a.category));
 
   return (
-    <div className="bg-ink text-fg">
+    <div className="bg-canvas text-fg">
       <SEO
-        title="Insights"
+        title="Insights: Guides on Web Development, SEO, AI Search and Marketing"
         description="Practical, plain-language guides on web development, SEO, GEO and AI search, digital marketing and automation from the Qevnaro editorial team."
         path="/insights"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Blog',
+          name: 'Qevnaro Insights',
+          url: `${site.url}/insights`,
+          blogPost: INSIGHTS.map((a) => ({ '@type': 'BlogPosting', headline: a.title, url: `${site.url}/insights/${a.slug}`, datePublished: a.date })),
+        }}
       />
 
-      <section className="relative overflow-hidden border-b border-line pt-36 pb-16 sm:pt-44">
-        <div className="bg-grid absolute inset-0" aria-hidden="true" />
-        <div className="absolute -top-40 left-[-10%] h-[480px] w-[480px] rounded-full bg-brand-blue/15 blur-[140px]" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Breadcrumbs items={[{ label: 'Insights' }]} />
-          <Reveal>
-            <p className="font-mono text-xs uppercase tracking-widest text-brand-sky">Insights</p>
-            <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.08] text-gradient sm:text-5xl lg:text-6xl">
-              Clear thinking on building and growing online.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-fg-soft">
-              Honest, practical guides for business owners and teams. No hype, no invented statistics.
-            </p>
-          </Reveal>
-        </div>
-      </section>
+      <PageHero
+        crumbs={[{ label: 'Insights' }]}
+        eyebrow="Insights"
+        title="Clear thinking on building and growing online."
+        accent="growing online."
+        lead="Honest, practical guides for business owners and teams. No hype, no invented statistics."
+      />
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <section className="container-x py-16 sm:py-20">
         {/* Featured */}
         {!filtering && (
           <Reveal>
@@ -61,13 +60,12 @@ export const Insights: React.FC = () => {
               to={`/insights/${featured.slug}`}
               className={`${card} group relative mb-14 block overflow-hidden p-8 transition-colors hover:border-line-strong sm:p-12`}
             >
-              <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-blue/15 blur-[100px]" aria-hidden="true" />
               <div className="relative max-w-3xl">
                 <div className="flex flex-wrap items-center gap-3 text-xs text-fg-muted">
-                  <span className="rounded-full border border-brand-sky/40 bg-brand-blue/10 px-3 py-1 font-mono text-brand-sky">Featured</span>
+                  <span className="t-micro rounded-full bg-brand-navy px-3 py-1 text-white">Featured</span>
                   <span>{featured.category}</span>
                 </div>
-                <h2 className="mt-5 font-display text-3xl font-bold leading-tight sm:text-4xl">{featured.title}</h2>
+                <h2 className="t-h1 mt-5 text-fg">{featured.title}</h2>
                 <p className="mt-4 text-lg leading-relaxed text-fg-soft">{featured.excerpt}</p>
                 <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-fg-muted">
                   <span>{featured.author}</span>
@@ -98,8 +96,8 @@ export const Insights: React.FC = () => {
                   onClick={() => setCat(c)}
                   className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
                     active
-                      ? 'border-brand-blue bg-brand-blue text-white'
-                      : `border-line-strong bg-white/[0.03] hover:bg-white/[0.08] ${empty ? 'text-fg-muted' : 'text-fg-soft'}`
+                      ? 'border-brand-navy bg-brand-navy text-white'
+                      : `border-line-strong bg-surface hover:border-fg ${empty ? 'text-fg-muted' : 'text-fg-soft'}`
                   }`}
                 >
                   {c}
@@ -115,7 +113,7 @@ export const Insights: React.FC = () => {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search articles"
-              className="w-full rounded-full border border-line-strong bg-surface py-2.5 pl-10 pr-4 text-sm text-fg placeholder:text-fg-muted focus:border-brand-sky focus:outline-none"
+              className="w-full rounded-full border border-line-strong bg-surface py-2.5 pl-10 pr-4 text-sm text-fg placeholder:text-fg-muted focus:border-brand-blue focus:outline-none"
             />
           </label>
         </div>
@@ -127,10 +125,10 @@ export const Insights: React.FC = () => {
               <Reveal key={a.slug} delay={(i % 3) * 0.06}>
                 <Link
                   to={`/insights/${a.slug}`}
-                  className={`${card} group flex h-full flex-col p-7 transition-all duration-300 hover:-translate-y-1 hover:border-line-strong hover:bg-elevated`}
+                  className={`${card} group flex h-full flex-col p-7 transition-all duration-300 hover:-translate-y-1 hover:border-line-strong hover:shadow-[0_24px_50px_-34px_rgba(12,29,72,0.35)]`}
                 >
-                  <span className="font-mono text-xs text-brand-sky">{a.category}</span>
-                  <h3 className="mt-3 font-display text-xl font-semibold leading-snug">{a.title}</h3>
+                  <span className="t-micro text-brand-sky">{a.category}</span>
+                  <h3 className="t-h3 mt-3 text-fg">{a.title}</h3>
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-fg-soft">{a.excerpt}</p>
                   <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line pt-4 text-xs text-fg-muted">
                     <span>{a.author}</span>
@@ -159,13 +157,7 @@ export const Insights: React.FC = () => {
         )}
       </section>
 
-      <section className="border-t border-line">
-        <div className="mx-auto max-w-4xl px-4 py-20 text-center sm:px-6">
-          <h2 className="font-display text-3xl font-bold sm:text-4xl">Have a question we have not covered?</h2>
-          <p className="mx-auto mt-4 max-w-xl text-fg-soft">Tell us what you are working on and we will point you in a sensible direction.</p>
-          <div className="mt-8 flex justify-center"><Button to="/contact">Talk to Qevnaro</Button></div>
-        </div>
-      </section>
+      <FinalCTA heading="Have a question we have not covered?" accent="covered?" body="Tell us what you are working on and we will point you in a sensible direction." />
     </div>
   );
 };

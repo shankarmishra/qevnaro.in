@@ -43,7 +43,7 @@ export const SwarmActivityLog: React.FC<SwarmActivityLogProps> = ({
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.85, opacity: 0 }}
-            className="card-glow glass-dock flex items-center gap-2.5 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-mono text-fg shadow-2xl border border-white/10"
+            className="card-glow glass-dock flex items-center gap-2.5 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-mono text-fg shadow-2xl border border-line"
           >
             <button
               type="button"
@@ -55,7 +55,7 @@ export const SwarmActivityLog: React.FC<SwarmActivityLogProps> = ({
                 {isBuilding && (
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-cyan opacity-75" />
                 )}
-                <span className={`relative inline-flex h-2 w-2 rounded-full ${isComplete ? 'bg-emerald-400' : 'bg-brand-sky'}`} />
+                <span className={`relative inline-flex h-2 w-2 rounded-full ${isComplete ? 'bg-ok' : 'bg-brand-sky'}`} />
               </span>
               <span className="font-semibold text-brand-sky">Swarm</span>
               <span className="text-fg-muted font-mono text-[11px]">{completedBlocks}/{totalBlocks}</span>
@@ -79,16 +79,16 @@ export const SwarmActivityLog: React.FC<SwarmActivityLogProps> = ({
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="card-glow glass-dock w-80 sm:w-96 rounded-2xl border border-white/10 p-3.5 shadow-2xl backdrop-blur-2xl"
+            className="card-glow glass-dock w-80 sm:w-96 rounded-2xl border border-line p-3.5 shadow-2xl backdrop-blur-2xl"
           >
             {/* HUD Header */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+            <div className="flex items-center justify-between border-b border-line pb-2.5">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2.5 w-2.5">
                   {isBuilding && (
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-cyan opacity-75" />
                   )}
-                  <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${isComplete ? 'bg-emerald-400' : 'bg-brand-sky'}`} />
+                  <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${isComplete ? 'bg-ok' : 'bg-brand-sky'}`} />
                 </span>
                 <span className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-fg">
                   <Cpu className="h-3.5 w-3.5 text-brand-sky" />
@@ -100,7 +100,7 @@ export const SwarmActivityLog: React.FC<SwarmActivityLogProps> = ({
                 <button
                   type="button"
                   onClick={() => setMinimized(true)}
-                  className="rounded p-1 hover:bg-white/10 text-fg-muted hover:text-fg"
+                  className="rounded p-1 hover:bg-elevated text-fg-muted hover:text-fg"
                   aria-label="Minimize HUD"
                 >
                   <ChevronDown className="h-3.5 w-3.5" />
@@ -116,7 +116,7 @@ export const SwarmActivityLog: React.FC<SwarmActivityLogProps> = ({
                   {completedBlocks} / {totalBlocks} ({totalBlocks > 0 ? Math.round((completedBlocks / totalBlocks) * 100) : 0}%)
                 </span>
               </div>
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-elevated">
                 <motion.div
                   className="h-full bg-gradient-to-r from-brand-blue to-accent-cyan shadow-[0_0_10px_rgba(56,189,248,0.7)]"
                   initial={false}
@@ -155,7 +155,7 @@ export const SwarmActivityLog: React.FC<SwarmActivityLogProps> = ({
             </div>
 
             {/* Controls */}
-            <div className="mt-3.5 pt-2.5 border-t border-white/10 flex items-center gap-2">
+            <div className="mt-3.5 pt-2.5 border-t border-line flex items-center gap-2">
               {isBuilding ? (
                 <button
                   type="button"
@@ -166,7 +166,7 @@ export const SwarmActivityLog: React.FC<SwarmActivityLogProps> = ({
                   Skip to Finish
                 </button>
               ) : (
-                <div className="flex-1 flex items-center gap-1.5 text-xs font-mono text-emerald-400">
+                <div className="flex-1 flex items-center gap-1.5 text-xs font-mono text-ok">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   Swarm Build Complete
                 </div>
@@ -174,7 +174,7 @@ export const SwarmActivityLog: React.FC<SwarmActivityLogProps> = ({
               <button
                 type="button"
                 onClick={onRebuild}
-                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-fg-soft hover:text-fg border border-white/10 text-xs font-mono font-medium transition-all"
+                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-elevated hover:bg-elevated text-fg-soft hover:text-fg border border-line text-xs font-mono font-medium transition-all"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
                 Rebuild
