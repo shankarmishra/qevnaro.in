@@ -6,8 +6,12 @@ export interface Project {
   category: string;
   tagline: string;
   intro: string;
-  cover: string;
-  coverAlt: string;
+  /** Screenshots captured from the live product. */
+  shots: { desktop: string[]; mobile: string };
+  /** Hostname shown in browser frames. */
+  host: string;
+  /** Public social profile for the product, when one exists. */
+  instagram?: string;
   liveUrl: string;
   client: string;
   challenge: string[];
@@ -31,8 +35,11 @@ export const projects: Project[] = [
     tagline: 'Doorstep nursing and teleconsultation, built as one connected platform.',
     intro:
       'Pulse n Care connects families with registered nurses and clinicians at home across Delhi NCR. We designed and built the web platform that handles discovery, booking, video consultations and caregiver dispatch.',
-    cover: '/assets/banners/pulsencare-flagship-3d-banner.jpg',
-    coverAlt: 'Pulse n Care telehealth platform banner',
+    shots: {
+      desktop: ['/assets/work/pulsencare-desktop.webp', '/assets/work/pulsencare-desktop-2.webp', '/assets/work/pulsencare-desktop-3.webp'],
+      mobile: '/assets/work/pulsencare-mobile.webp',
+    },
+    host: 'pulsencare.com',
     liveUrl: 'https://www.pulsencare.com/',
     client: 'Pulse n Care',
     challenge: [
@@ -67,20 +74,24 @@ export const projects: Project[] = [
       { src: '/assets/images/pulse-n-care-nurse-hero.webp', alt: 'Pulse n Care nurse hero image' },
       { src: '/assets/images/pulse-n-care-team-banner-9.webp', alt: 'Pulse n Care team banner' },
     ],
-    path: '/case-studies/pulsencare',
+    path: '/work/pulsencare',
   },
   {
     slug: 'menusqr',
-    name: 'MenuSQR',
+    name: 'MenusQR',
     industry: 'Hospitality',
     category: 'Restaurant ordering platform',
     tagline: 'QR menus, ordering and payments that need no app download.',
     intro:
-      'MenuSQR lets restaurants run a living digital menu behind a permanent QR code. Guests scan, browse, order and pay from their own phone, while the kitchen sees orders as they arrive.',
-    cover: '/assets/banners/menusqr-flagship-3d-banner.jpg',
-    coverAlt: 'MenuSQR QR dining platform banner',
+      'MenusQR lets restaurants run a living digital menu behind a permanent QR code. Guests scan, browse, order and pay from their own phone, while the kitchen sees orders as they arrive.',
+    shots: {
+      desktop: ['/assets/work/menusqr-desktop.webp', '/assets/work/menusqr-desktop-2.webp', '/assets/work/menusqr-desktop-3.webp'],
+      mobile: '/assets/work/menusqr-mobile.webp',
+    },
+    host: 'menusqr.in',
+    instagram: 'https://www.instagram.com/menusqr.in/',
     liveUrl: 'https://menusqr.in/',
-    client: 'MenuSQR',
+    client: 'MenusQR',
     challenge: [
       'Printed menus are costly to reprint every time prices change or a dish sells out.',
       'Peak-hour tables wait on menus, orders and bills, which slows service.',
@@ -114,6 +125,6 @@ export const projects: Project[] = [
       { src: '/assets/images/garlic_bread.webp', alt: 'Garlic bread menu item' },
       { src: '/assets/images/iced_coffee.webp', alt: 'Iced coffee menu item' },
     ],
-    path: '/case-studies/menusqr',
+    path: '/work/menusqr',
   },
 ];

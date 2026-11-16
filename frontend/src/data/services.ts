@@ -173,3 +173,49 @@ export const SERVICES_LIST: ServiceMeta[] = [
 
 export const getServiceMeta = (slug: string): ServiceMeta | undefined =>
   SERVICES_LIST.find((s) => s.slug === slug);
+
+/** Short names for navigation and tight layouts. */
+export const SERVICE_SHORT: Record<string, string> = {
+  'web-development': 'Web Development',
+  'mobile-app-development': 'Mobile Apps',
+  'ecommerce-development': 'E-commerce',
+  'ui-ux-design': 'UI/UX Design',
+  'digital-marketing': 'Digital Marketing',
+  seo: 'SEO',
+  'geo-aeo': 'GEO & AEO',
+  'social-media-marketing': 'Social Media',
+  'performance-marketing': 'Performance Marketing',
+  branding: 'Branding',
+  'content-marketing': 'Content Marketing',
+  'video-creative-production': 'Video Production',
+  'email-marketing': 'Email & WhatsApp',
+  'marketing-automation': 'Marketing Automation',
+  'ai-automation': 'AI Automation',
+  'chatbots-agents': 'Chatbots & Agents',
+  'cloud-devops': 'Cloud & DevOps',
+};
+
+export interface ServiceGroup {
+  key: ServiceMeta['category'];
+  n: string;
+  verb: string;
+  blurb: string;
+  art: ServiceMeta['artKind'];
+  services: ServiceMeta[];
+}
+
+const group = (
+  key: ServiceMeta['category'],
+  n: string,
+  verb: string,
+  blurb: string,
+  art: ServiceMeta['artKind'],
+): ServiceGroup => ({ key, n, verb, blurb, art, services: SERVICES_LIST.filter((s) => s.category === key) });
+
+/** The four service groups, in the order they are shown everywhere on the site. */
+export const SERVICE_GROUPS: ServiceGroup[] = [
+  group('Digital Experience', '01', 'Build', 'Websites, apps and stores designed and engineered by one team.', 'code'),
+  group('Digital Growth', '02', 'Grow', 'Search, AI-search, social and paid campaigns that bring the right people in.', 'growth'),
+  group('Creative & Brand', '03', 'Brand', 'Identity, content and video that make the business recognisable.', 'brand'),
+  group('Technology & Automation', '04', 'Automate', 'AI agents, CRM workflows and cloud that take over the repetitive work.', 'ai'),
+];

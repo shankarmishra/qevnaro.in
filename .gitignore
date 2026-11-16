@@ -9,3 +9,8 @@ dist-ssr/
 .DS_Store
 .vscode/
 .idea/
+
+# Private HR documents — never deploy or commit
+private-docs/
+*Offer_Letter*
+*offer-letter*

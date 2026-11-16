@@ -1,279 +1,238 @@
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Bot, ArrowRight, ShieldCheck, Cpu, ArrowLeft } from 'lucide-react';
+import { ArrowRight, Check, Info, X } from 'lucide-react';
 import { AgentsSwarmEngine } from '../components/agents-at-work/AgentsSwarmEngine';
+import { Eyebrow } from '../components/ui/Reveal';
+import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { SEO } from '../components/ui/SEO';
 
+/**
+ * A page that assembles itself block by block, as a demonstration of how a multi-agent
+ * pipeline divides work. The animation is scripted; the copy describes what such systems
+ * genuinely do and where they fall short, with no performance figures.
+ */
 const AGENT_CARDS = [
   {
-    name: 'Agent Apex',
-    role: 'Swarm Orchestrator',
-    color: '#3B82F6',
-    desc: 'Decomposes complex client briefs into autonomous parallel workstreams, assigning tasks across engineering, copywriting, and design.',
-    stats: '12ms Task Dispatch',
-    code: '<AgentApex role="orchestrator" />',
+    name: 'Orchestrator',
+    role: 'Plans the work',
+    desc: 'Breaks a brief into smaller tasks, decides the order, and hands each one to the agent best suited to it.',
+    use: 'Used for multi-step jobs such as onboarding a lead or preparing a report',
+    code: '<Orchestrator />',
     agent: 'Agent Apex',
   },
   {
-    name: 'Vector RAG Engine',
-    role: 'Enterprise Knowledge',
-    color: '#06B6D4',
-    desc: 'Connects proprietary enterprise PDFs, databases, and CRMs with zero-leak vector embeddings and sub-second semantic retrieval.',
-    stats: '< 80ms Retrieval',
-    code: '<VectorRAGEngine embeddings="text-embedding-3" />',
+    name: 'Knowledge assistant',
+    role: 'Answers from your documents',
+    desc: 'Searches your own PDFs, policies and product data, then answers with that material as the source instead of guessing.',
+    use: 'Used for support desks, internal help and sales enablement',
+    code: '<KnowledgeAssistant source="your-docs" />',
     agent: 'Vector RAG',
   },
   {
-    name: 'CRO & Growth Bot',
-    role: 'Conversion Optimization',
-    color: '#EF4444',
-    desc: 'Simulates thousands of user purchase journeys, dynamically writing high-converting variants for Google Ads and landing pages.',
-    stats: '+34.8% Funnel Lift',
-    code: '<CROEngine variants={24} mode="auto-tune" />',
+    name: 'Content assistant',
+    role: 'Drafts and adapts copy',
+    desc: 'Produces first drafts of ads, emails and page copy in your tone, for a person to review, edit and approve.',
+    use: 'Used for campaign variants, product descriptions and follow-up emails',
+    code: '<ContentAssistant review="human" />',
     agent: 'CRO Engine',
   },
   {
-    name: 'DevOps Sentinel',
-    role: 'Autonomous Infra',
-    color: '#10B981',
-    desc: 'Provisions multi-region cloud containers, monitors latency spikes, and self-heals broken deployment dependencies without human intervention.',
-    stats: '99.99% Auto-Uptime',
-    code: '<DevOpsSentinel cloud="aws-hybrid" />',
+    name: 'Operations monitor',
+    role: 'Watches and alerts',
+    desc: 'Keeps an eye on forms, queues, uptime and deployments, and raises an alert or runs an agreed fix when something breaks.',
+    use: 'Used for lead routing, order status and deployment checks',
+    code: '<OperationsMonitor alerts="on" />',
     agent: 'DevOps Sentinel',
   },
 ];
 
-const METRICS = [
-  { value: '$42M+', label: 'Client Revenue Generated' },
-  { value: '14.2s', label: 'Swarm Page Assembly' },
-  { value: '99.98%', label: 'Automation Accuracy' },
-  { value: '500+', label: 'AI Pipelines Deployed' },
+const GOOD = [
+  'Repetitive, rules-based steps: routing leads, tagging tickets, filling CRM fields',
+  'Answering common questions from documents you already have',
+  'First drafts that a person then edits',
+  'Watching for a condition and telling the right person quickly',
+];
+const NOT_GOOD = [
+  'Decisions that need judgement, context or accountability',
+  'Anything where a wrong answer is costly and nobody checks it',
+  'Replacing a missing process: automation speeds up a process, it does not invent one',
+  'Guaranteed accuracy. Outputs need review, especially at the start',
+];
+
+const LOG = [
+  ['Orchestrator', 'Split the brief into tasks and assigned them.'],
+  ['Knowledge assistant', 'Indexed the supplied documents for retrieval.'],
+  ['Content assistant', 'Drafted the page copy and sent it for review.'],
+  ['Operations monitor', 'Checked the build and reported it healthy.'],
 ];
 
 export const AgentsAtWorkPage: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-ink text-fg overflow-hidden pt-6 pb-24">
+    <div ref={containerRef} className="relative min-h-screen overflow-hidden bg-canvas pb-24 pt-32 text-fg sm:pt-40">
       <SEO
-        title="Agents at Work — A Page That Builds Itself | Qevnaro"
-        description="Experience Qevnaro's autonomous multi-agent swarm building a live digital platform block by block in real time."
+        title="Agents at Work: How Multi-Agent AI Automation Divides the Work"
+        description="A demonstration page that assembles itself block by block, showing how an orchestrator, a knowledge assistant, a content assistant and an operations monitor share a task, and what AI agents are and are not good at."
         path="/agents-at-work"
       />
 
-      {/* Autonomous Swarm Animation Coordinator */}
+      {/* Drives the block-by-block assembly animation */}
       <AgentsSwarmEngine containerRef={containerRef} autoPlay />
 
-      {/* Main Assembly Viewport */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="container-x relative z-10">
+        <Breadcrumbs items={[{ label: 'Agents at work' }]} />
 
-        {/* 1. Lab Breadcrumb Trail */}
-        <div
-          data-block
-          data-code="<BreadcrumbRail path='Lab / Agents at work' />"
-          data-log="mounted breadcrumb rail"
-          data-agent="Layout Synth"
-          className="mb-6 sm:mb-10"
-        >
-          <div className="fill flex items-center justify-between gap-3 border-b border-line/40 pb-3 pt-1 text-xs font-mono">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 text-fg-muted hover:text-brand-sky transition-colors"
-            >
-              <ArrowLeft className="h-3 w-3" />
-              <span>Lab / Agents</span>
-            </Link>
-
-            <span className="inline-flex items-center gap-1.5 text-[11px] text-brand-sky">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Swarm v2.4 · 12 Nodes
-            </span>
-          </div>
-        </div>
-
-        {/* 2. Hero Headline Block with Character Typing */}
-        <div
-          data-block
-          data-code="<HeroHeadline typing={true} />"
-          data-log="typed hero headline"
-          data-agent="Neural Copy"
-          className="max-w-4xl py-2 sm:py-4"
-        >
+        <div data-block data-code="<Headline />" data-log="typed the headline" data-agent="Neural Copy" className="max-w-4xl">
           <div className="fill">
+            <Eyebrow>Lab · scripted demonstration</Eyebrow>
             <h1
               data-type="headline"
-              data-text="We Don't Just Write Code. We Deploy Autonomous Swarms."
-              className="font-display text-2xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-fg leading-[1.14]"
+              data-text="A page that builds itself, the way agents share a job."
+              className="t-h1 mt-5 text-fg"
             >
-              We Don&apos;t Just Write Code. We Deploy Autonomous Swarms.
+              A page that builds itself, the way agents share a job.
             </h1>
-
-            <p className="mt-3 text-sm sm:text-base leading-relaxed text-fg-soft max-w-2xl">
-              Watch our multi-agent architecture assemble layouts, wireframe skeletons, real-time typography, and reactive systems before your eyes.
+            <p className="t-lead mt-6 max-w-2xl text-fg-soft">
+              Watch the blocks below arrive one at a time, each placed by a different agent. It is a staged
+              animation, but the division of labour it shows is how we design real automation.
             </p>
           </div>
         </div>
 
-        {/* 3. Four Core Qevnaro Agent Cards */}
-        <div className="mt-12">
-          <div
-            data-block
-            data-code="<SectionHeading label='Core Swarm Nodes' />"
-            data-log="placed Swarm Nodes header"
-            data-agent="Layout Synth"
-            className="mb-8"
-          >
-            <div className="fill flex items-center justify-between border-b border-line pb-4">
-              <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-brand-sky" />
-                <h2 className="font-display text-xl sm:text-2xl font-semibold text-fg">Active Swarm Nodes</h2>
-              </div>
-              <span className="font-mono text-xs text-fg-muted">4 Autonomous Units</span>
+        <div className="mt-16">
+          <div data-block data-code="<SectionHeading />" data-log="placed the section heading" data-agent="Layout Synth" className="mb-8">
+            <div className="fill flex items-end justify-between border-b border-line-strong pb-4">
+              <h2 className="t-h2 text-fg">Four roles, one pipeline</h2>
+              <span className="t-micro hidden text-fg-muted sm:block">Each block placed by one agent</span>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {AGENT_CARDS.map((card) => (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {AGENT_CARDS.map((card, i) => (
               <div
                 key={card.name}
                 data-block
                 data-code={card.code}
-                data-log={`compiled ${card.name} card`}
+                data-log={`built the ${card.name.toLowerCase()} card`}
                 data-agent={card.agent}
-                className="card-glow rounded-xl sm:rounded-2xl border border-line p-4 sm:p-6 bg-surface/70 flex flex-col justify-between"
+                className="flex flex-col justify-between rounded-[var(--radius-lg)] border border-line bg-surface p-6"
               >
                 <div className="fill">
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="px-2.5 py-1 rounded font-mono text-[10px] sm:text-[11px] font-semibold"
-                      style={{ backgroundColor: `${card.color}22`, color: card.color, border: `1px solid ${card.color}44` }}
-                    >
-                      {card.role}
-                    </span>
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: card.color }} />
-                  </div>
-
-                  <h3 className="mt-3 sm:mt-4 font-display text-base sm:text-lg font-semibold text-fg">{card.name}</h3>
-                  <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm leading-relaxed text-fg-soft">{card.desc}</p>
+                  <span className="serif-accent text-3xl leading-none text-brand-blue">{String(i + 1).padStart(2, '0')}</span>
+                  <p className="t-micro mt-4 text-fg-muted">{card.role}</p>
+                  <h3 className="t-h3 mt-2 text-fg">{card.name}</h3>
+                  <p className="mt-3 text-[15px] leading-relaxed text-fg-soft">{card.desc}</p>
                 </div>
-
-                <div className="fill mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-line/50 flex items-center justify-between font-mono text-[11px] sm:text-xs">
-                  <span className="text-fg-muted">Performance</span>
-                  <span className="font-semibold text-brand-sky">{card.stats}</span>
-                </div>
+                <p className="fill mt-6 border-t border-line pt-4 text-[13px] leading-snug text-fg-muted">{card.use}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* 4. Live Agency Telemetry Metrics Grid */}
-        <div className="mt-10 sm:mt-16">
+        <div className="mt-16 grid gap-4 lg:grid-cols-2">
           <div
             data-block
-            data-code="<AgencyTelemetryGrid metrics={4} />"
-            data-log="deployed live telemetry dock"
+            data-code="<GoodAt />"
+            data-log="listed what agents handle well"
             data-agent="Schema Core"
-            className="card-glow rounded-xl sm:rounded-2xl border border-line bg-surface/40 p-4 sm:p-8"
+            className="rounded-[var(--radius-lg)] border border-line bg-surface p-7 sm:p-9"
           >
-            <div className="fill grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
-              {METRICS.map((metric) => (
-                <div key={metric.label} className="text-left">
-                  <span className="font-display text-2xl sm:text-4xl font-bold text-fg block">
-                    {metric.value}
-                  </span>
-                  <span className="mt-1 sm:mt-2 block font-mono text-[11px] sm:text-xs text-fg-muted">
-                    {metric.label}
-                  </span>
-                </div>
-              ))}
+            <div className="fill">
+              <h2 className="t-h3 text-fg">What agents are good at</h2>
+              <ul className="mt-5 space-y-3.5">
+                {GOOD.map((g) => (
+                  <li key={g} className="flex gap-3 text-[15px] leading-snug text-fg-soft">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-ok" />
+                    {g}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div
+            data-block
+            data-code="<NotGoodAt />"
+            data-log="listed the limits honestly"
+            data-agent="Schema Core"
+            className="rounded-[var(--radius-lg)] border border-line bg-surface p-7 sm:p-9"
+          >
+            <div className="fill">
+              <h2 className="t-h3 text-fg">What they are not good at</h2>
+              <ul className="mt-5 space-y-3.5">
+                {NOT_GOOD.map((g) => (
+                  <li key={g} className="flex gap-3 text-[15px] leading-snug text-fg-soft">
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-bad" />
+                    {g}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
 
-        {/* 5. Swarm Architecture & Telemetry Terminal */}
         <div className="mt-16">
           <div
             data-block
-            data-code="<SwarmRuntimeConsole engine='v8' />"
-            data-log="initialized runtime telemetry"
+            data-code="<PipelineLog />"
+            data-log="wrote the pipeline log"
             data-agent="Codex Engine"
-            className="card-glow rounded-xl sm:rounded-2xl border border-line bg-surface/80 p-4 sm:p-8 font-mono text-xs"
+            className="rounded-[var(--radius-lg)] border border-line bg-surface p-6 sm:p-8"
           >
             <div className="fill">
-              <div className="flex items-center justify-between border-b border-line pb-3 sm:pb-4 mb-3 sm:mb-4">
-                <div className="flex items-center gap-2">
-                  <Cpu className="h-4 w-4 text-brand-sky" />
-                  <span className="text-fg font-semibold uppercase tracking-wider text-[11px] sm:text-xs">Swarm Pipeline</span>
-                </div>
-                <span className="text-[10px] sm:text-[11px] text-emerald-400 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  Active Stream
+              <div className="mb-4 flex items-center justify-between border-b border-line pb-4">
+                <span className="t-micro text-fg">Pipeline log</span>
+                <span className="flex items-center gap-1.5 text-[13px] text-fg-muted">
+                  <Info className="h-3.5 w-3.5" /> Illustrative
                 </span>
               </div>
-
-              <div className="space-y-2 text-fg-soft leading-relaxed text-[11px] sm:text-xs">
-                <p className="flex flex-wrap sm:flex-nowrap items-baseline gap-1.5">
-                  <span className="text-fg-muted font-mono shrink-0">[00:01.04]</span>
-                  <span className="text-blue-400 font-semibold shrink-0">Agent Apex:</span>
-                  <span className="break-words">Decomposed requirements into 12 micro-tasks with zero human blockers.</span>
-                </p>
-                <p className="flex flex-wrap sm:flex-nowrap items-baseline gap-1.5">
-                  <span className="text-fg-muted font-mono shrink-0">[00:01.28]</span>
-                  <span className="text-cyan-400 font-semibold shrink-0">Vector RAG:</span>
-                  <span className="break-words">Vectorized 42 proprietary documents into 1536-dimensional hyperplanes.</span>
-                </p>
-                <p className="flex flex-wrap sm:flex-nowrap items-baseline gap-1.5">
-                  <span className="text-fg-muted font-mono shrink-0">[00:01.62]</span>
-                  <span className="text-emerald-400 font-semibold shrink-0">DevOps Sentinel:</span>
-                  <span className="break-words">Automated load balancer deployment across AWS edge clusters.</span>
-                </p>
-              </div>
+              <ol className="space-y-2.5 font-mono text-[13px] leading-relaxed text-fg-soft">
+                {LOG.map(([who, what], i) => (
+                  <li key={who} className="flex flex-wrap gap-x-3 gap-y-0.5">
+                    <span className="text-fg-muted">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="font-medium text-brand-sky">{who}</span>
+                    <span>{what}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
         </div>
 
-        {/* 6. Final Client Handover / Launchpad Block */}
-        <div className="mt-10 sm:mt-16 mb-8 sm:mb-12">
+        <div className="mt-16">
           <div
             data-block
-            data-code="<HumanHandoverCTA action='deploy' />"
-            data-log="rendered client launchpad"
+            data-code="<HandoverCTA />"
+            data-log="handed over to a person"
             data-agent="Agent Apex"
-            className="card-glow rounded-2xl sm:rounded-3xl border border-brand-blue/40 bg-gradient-to-br from-surface to-elevated p-6 sm:p-12 text-center"
+            className="notch-tr bg-brand-navy p-8 text-white sm:p-14"
           >
-            <div className="fill max-w-2xl mx-auto">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-0.5 font-mono text-[11px] text-emerald-400 mb-3">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                Assembly Ready for Human Control
-              </div>
-
-              <h2 className="font-display text-2xl sm:text-4xl font-semibold text-fg">
-                Ready to Put Autonomous Intelligence to Work?
+            <div className="fill max-w-2xl">
+              <p className="t-micro text-white/60">Handed over to a person</p>
+              <h2 className="t-h1 mt-4 text-white">
+                Want this kind of help in <span className="serif-accent">your</span> business?
               </h2>
-
-              <p className="mt-3 text-xs sm:text-base text-fg-soft leading-relaxed">
-                Whether you need custom RAG assistants, automated multi-app workflows, or high-performance digital products, our team and swarm are ready to build.
+              <p className="t-lead mt-5 text-white/75">
+                We start with one workflow that costs your team time every week, automate it, and keep a
+                person in the loop wherever a mistake would matter.
               </p>
-
-              <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/contact"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-brand-blue px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-blue/30 hover:bg-brand-blue/90 transition-all"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-7 text-[15px] font-medium text-brand-navy transition-colors hover:bg-canvas"
                 >
-                  Start Your Project
-                  <ArrowRight className="h-4 w-4" />
+                  Start a project <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   to="/services/ai-automation"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-line-strong bg-surface px-6 py-3 text-sm font-semibold text-fg hover:border-brand-sky hover:text-brand-sky transition-all"
+                  className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-white/25 px-7 text-[15px] font-medium text-white transition-colors hover:border-white hover:bg-white/10"
                 >
-                  Explore AI Automation
+                  AI automation services
                 </Link>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

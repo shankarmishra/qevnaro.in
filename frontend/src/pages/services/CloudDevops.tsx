@@ -1,9 +1,7 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { Cloud } from 'lucide-react';
 import { ServiceDetailLayout, type ServicePageData } from '../../components/common/ServiceDetailLayout';
-import { Eyebrow, SplitHeading } from '../../components/ui/Reveal';
 
-const ScalabilityBricksMassif = lazy(() => import('../../components/ui/ScalabilityBricksMassif'));
 
 const DATA: ServicePageData = {
   badge: 'Category G · Cloud & Infrastructure',
@@ -96,20 +94,7 @@ const DATA: ServicePageData = {
 
 export const CloudDevops: React.FC = () => {
   return (
-    <ServiceDetailLayout data={DATA}>
-      <div className="mb-10 max-w-3xl">
-        <Eyebrow>Elastic Infrastructure</Eyebrow>
-        <SplitHeading as="h2" text="Simulate Scaling Under Live Traffic" className="mt-4 font-display text-3xl font-bold sm:text-4xl" />
-        <p className="mt-4 text-sm leading-relaxed text-fg-soft">
-          Test auto-scaling resilience in this interactive 3D simulation. Trigger simulated traffic spikes to see container distribution and cluster balancing.
-        </p>
-      </div>
-      <div className="relative">
-        <Suspense fallback={<div className="grid h-64 place-items-center font-mono text-xs text-fg-muted">Loading cloud simulation...</div>}>
-          <ScalabilityBricksMassif />
-        </Suspense>
-      </div>
-    </ServiceDetailLayout>
+    <ServiceDetailLayout data={DATA} />
   );
 };
 

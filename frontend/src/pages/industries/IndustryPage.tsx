@@ -1,150 +1,110 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowUpRight, Info, Check, X } from 'lucide-react';
+import { ArrowUpRight, Check, Info } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Reveal, SplitHeading, Eyebrow } from '../../components/ui/Reveal';
+import { Reveal } from '../../components/ui/Reveal';
 import { Accordion } from '../../components/ui/Accordion';
-import { Breadcrumbs } from '../../components/ui/Breadcrumbs';
+import { PageHero, SectionHead } from '../../components/ui/PageHero';
 import { SEO } from '../../components/ui/SEO';
-import { LineArt } from '../../components/ui/line-art/LineArt';
+import { ServiceObject, objectFor } from '../../components/ui/ServiceObject';
+import { FinalCTA } from '../../components/home/FinalCTA';
+import { NotFound } from '../NotFound';
 import { getIndustry, industries, SERVICE_LABELS } from '../../data/industries';
-import { EASE, viewport } from '../../lib/motion';
-
-const NotFoundInline: React.FC = () => (
-  <div className="bg-ink text-fg">
-    <SEO title="Industry not found" description="This industry page does not exist." noindex />
-    <section className="mx-auto flex min-h-[70vh] max-w-3xl flex-col items-start justify-center px-4 pt-32 pb-20 sm:px-6">
-      <Eyebrow>404</Eyebrow>
-      <h1 className="mt-4 font-display text-4xl font-bold sm:text-5xl">We could not find that industry.</h1>
-      <p className="mt-5 text-fg-soft">It may have moved or never existed. Browse the industries we work with instead.</p>
-      <div className="mt-8"><Button to="/industries">All industries</Button></div>
-    </section>
-  </div>
-);
+import { faqSchema } from '../../lib/schema';
+import { projects } from '../../lib/projects';
 
 export const IndustryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const ind = getIndustry(slug);
-  if (!ind) return <NotFoundInline />;
+  if (!ind) {
+    return <NotFound title="We could not find that industry." body="It may have moved or never existed. Browse the industries we work with instead." />;
+  }
 
   const path = `/industries/${ind.slug}`;
   const related = Array.from(new Set(ind.solutions.map((s) => s.service)));
-  const others = industries.filter((i) => i.slug !== ind.slug).slice(0, 3);
+  const others = industries.filter((i) => i.slug !== ind.slug);
+  // A case study from the same sector, when we have one
+  const proof = projects.find((p) => ind.name.toLowerCase().includes(p.industry.toLowerCase()));
 
   return (
-    <div className="bg-ink text-fg">
-      <SEO
-        title={ind.seoTitle}
-        description={ind.seoDescription}
-        path={path}
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'FAQPage',
-          mainEntity: ind.faqs.map((f) => ({
-            '@type': 'Question',
-            name: f.q,
-            acceptedAnswer: { '@type': 'Answer', text: f.a },
-          })),
-        }}
+    <div className="bg-canvas text-fg">
+      <SEO title={ind.seoTitle} description={ind.seoDescription} path={path} jsonLd={faqSchema(ind.faqs)} />
+
+      <PageHero
+        crumbs={[{ label: 'Industries', to: '/industries' }, { label: ind.shortName }]}
+        eyebrow={`Industry · ${ind.shortName}`}
+        title={ind.name}
+        lead={ind.tagline}
+        actions={
+          <>
+            <Button to="/contact">Talk to us</Button>
+            <a href="#challenges" className="inline-flex min-h-[46px] items-center rounded-full border border-line-strong px-6 text-sm font-medium text-fg transition-colors hover:border-fg">
+              See how we help
+            </a>
+          </>
+        }
+        note={
+          ind.disclaimer && (
+            <p className="flex items-start gap-2">
+              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {ind.disclaimer}
+            </p>
+          )
+        }
+        aside={
+          <div className="aspect-square w-full overflow-hidden rounded-[var(--radius-xl)] border border-line bg-[radial-gradient(ellipse_at_50%_55%,#ffffff_0%,#F1F0EB_75%)]">
+            <ServiceObject kind={objectFor(ind.art)} className="h-full w-full" />
+          </div>
+        }
       />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden border-b border-line pt-36 pb-20 sm:pt-44 sm:pb-28">
-        <div className="bg-grid absolute inset-0" aria-hidden="true" />
-        <div className="absolute -top-40 right-[-10%] h-[520px] w-[520px] rounded-full bg-brand-blue/15 blur-[140px]" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <div className="lg:col-span-7">
-            <Breadcrumbs items={[{ label: 'Industries', to: '/industries' }, { label: ind.shortName }]} />
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line-strong bg-white/[0.03] px-3.5 py-1.5 font-mono text-xs text-fg-soft">
-              <ind.icon className="h-3.5 w-3.5 text-brand-sky" />
-              <span>Industry · {ind.shortName}</span>
-            </div>
-            <SplitHeading as="h1" text={ind.name} className="font-display text-4xl font-bold leading-[1.06] text-gradient sm:text-5xl lg:text-6xl" />
-            <Reveal delay={0.3}>
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-fg-soft">{ind.tagline}</p>
-              <div className="mt-9 flex flex-wrap items-center gap-4">
-                <Button to="/contact">Talk to us</Button>
-                <Button href="#challenges" variant="ghost" arrow={false}>See how we help</Button>
-              </div>
-              {ind.disclaimer && (
-                <p className="mt-8 flex max-w-xl items-start gap-2 text-xs leading-relaxed text-fg-muted">
-                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {ind.disclaimer}
-                </p>
-              )}
-            </Reveal>
+      {/* Landscape */}
+      <section className="section-y border-b border-line bg-surface">
+        <div className="container-x grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-4">
+            <SectionHead eyebrow="The landscape" title={`Digital in ${ind.shortName.toLowerCase()}, honestly`} accent="honestly" />
           </div>
-          <div className="hidden lg:col-span-5 lg:block">
-            <LineArt kind={ind.art} className="mx-auto aspect-[5/4] w-full max-w-md" />
-          </div>
-        </div>
-      </section>
-
-      {/* INTRO */}
-      <section className="border-b border-line py-20 sm:py-24">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <Reveal className="lg:col-span-4">
-            <Eyebrow>The landscape</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl font-bold sm:text-4xl">Digital in {ind.shortName.toLowerCase()}, honestly</h2>
-          </Reveal>
-          <Reveal delay={0.1} className="space-y-5 leading-relaxed text-fg-soft lg:col-span-8 lg:text-lg">
-            <p>{ind.intro[0]}</p>
-            <p>{ind.intro[1]}</p>
+          <Reveal delay={0.1} className="space-y-5 lg:col-span-8">
+            <p className="text-xl leading-relaxed text-fg">{ind.intro[0]}</p>
+            <p className="text-[17px] leading-relaxed text-fg-soft">{ind.intro[1]}</p>
           </Reveal>
         </div>
       </section>
 
-      {/* CHALLENGES vs SOLUTIONS */}
-      <section id="challenges" className="scroll-mt-24 border-b border-line bg-surface py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Eyebrow>Challenges and solutions</Eyebrow>
-          <SplitHeading text="What gets in the way, and what we build" className="mt-4 mb-14 max-w-3xl font-display text-3xl font-bold sm:text-5xl" />
-          <div className="grid gap-8 lg:grid-cols-2">
+      {/* Challenges and what we build */}
+      <section id="challenges" className="section-y scroll-mt-24 border-b border-line bg-canvas">
+        <div className="container-x">
+          <SectionHead eyebrow="Challenges and solutions" title="What gets in the way, and what we build" accent="build" />
+          <div className="mt-14 grid gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
-              <h3 className="mb-5 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-fg-muted">
-                <X className="h-4 w-4 text-bad" /> Common challenges
-              </h3>
-              <ul className="space-y-3">
+              <p className="t-micro text-fg-muted">Common challenges</p>
+              <ul className="mt-4 border-t border-line-strong">
                 {ind.challenges.map((c, i) => (
-                  <motion.li
-                    key={c.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={viewport}
-                    transition={{ duration: 0.6, delay: i * 0.05, ease: EASE }}
-                    className="rounded-[var(--radius-lg)] border border-line border-l-2 border-l-bad/60 bg-ink p-5"
-                  >
-                    <strong className="block font-display text-base font-semibold">{c.title}</strong>
-                    <span className="mt-1 block text-sm leading-relaxed text-fg-muted">{c.desc}</span>
-                  </motion.li>
+                  <Reveal as="li" key={c.title} delay={i * 0.04} className="flex gap-5 border-b border-line py-5">
+                      <span className="font-mono text-xs text-fg-muted">{String(i + 1).padStart(2, '0')}</span>
+                      <div>
+                        <strong className="block font-display text-[17px] font-medium tracking-tight text-fg">{c.title}</strong>
+                        <span className="mt-1 block text-[15px] leading-relaxed text-fg-soft">{c.desc}</span>
+                      </div>
+                    </Reveal>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="mb-5 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-fg-muted">
-                <Check className="h-4 w-4 text-ok" /> Digital solutions
-              </h3>
-              <ul className="space-y-3">
+              <p className="t-micro text-brand-sky">What we build</p>
+              <ul className="mt-4 border-t border-line-strong">
                 {ind.solutions.map((s, i) => (
-                  <motion.li
-                    key={s.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={viewport}
-                    transition={{ duration: 0.6, delay: i * 0.05, ease: EASE }}
-                  >
-                    <Link
-                      to={`/services/${s.service}`}
-                      className="group flex items-start justify-between gap-4 rounded-[var(--radius-lg)] border border-line border-l-2 border-l-ok/60 bg-ink p-5 transition-colors hover:border-brand-blue/50"
-                    >
-                      <span>
-                        <strong className="block font-display text-base font-semibold">{s.title}</strong>
-                        <span className="mt-1 block text-sm leading-relaxed text-fg-soft">{s.desc}</span>
-                        <span className="mt-2 block font-mono text-[11px] text-brand-sky">{SERVICE_LABELS[s.service]}</span>
-                      </span>
-                      <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-fg-muted transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-sky" />
-                    </Link>
-                  </motion.li>
+                  <Reveal as="li" key={s.title} delay={i * 0.04} className="border-b border-line">
+                      <Link to={`/services/${s.service}`} className="group flex items-start justify-between gap-5 py-5">
+                        <span>
+                          <strong className="block font-display text-[17px] font-medium tracking-tight text-fg">
+                            <span className="link-underline">{s.title}</span>
+                          </strong>
+                          <span className="mt-1 block text-[15px] leading-relaxed text-fg-soft">{s.desc}</span>
+                          <span className="t-micro mt-2.5 block text-brand-sky">{SERVICE_LABELS[s.service]}</span>
+                        </span>
+                        <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-fg-muted transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-blue" />
+                      </Link>
+                    </Reveal>
                 ))}
               </ul>
             </div>
@@ -152,107 +112,121 @@ export const IndustryPage: React.FC = () => {
         </div>
       </section>
 
-      {/* CHANNELS + TECH */}
-      <section className="border-b border-line py-20 sm:py-28">
-        <div className="mx-auto grid max-w-7xl gap-14 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <div>
-            <Eyebrow>Marketing channels</Eyebrow>
-            <h2 className="mt-4 mb-8 font-display text-3xl font-bold sm:text-4xl">Where your audience is</h2>
-            <div className="divide-y divide-line border-y border-line">
+      {/* Channels + technology */}
+      <section className="section-y border-b border-line bg-surface">
+        <div className="container-x grid gap-14 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-7">
+            <SectionHead eyebrow="Marketing channels" title="Where your audience is" />
+            <ul className="mt-10 border-t border-line-strong">
               {ind.channels.map((c, i) => (
-                <Reveal key={c.title} delay={i * 0.04} className="flex gap-5 py-5">
-                  <span className="font-mono text-xs text-brand-sky">0{i + 1}</span>
+                <li key={c.title} className="flex gap-5 border-b border-line py-5">
+                  <span className="font-mono text-xs text-brand-sky">{String(i + 1).padStart(2, '0')}</span>
                   <div>
-                    <strong className="block font-display font-semibold">{c.title}</strong>
-                    <span className="text-sm leading-relaxed text-fg-soft">{c.desc}</span>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-          <Reveal delay={0.1} className="rounded-[var(--radius-lg)] border border-line bg-surface p-8 sm:p-10">
-            <Eyebrow>Technology requirements</Eyebrow>
-            <h2 className="mt-4 mb-7 font-display text-2xl font-bold sm:text-3xl">What the build must handle</h2>
-            <ul className="space-y-5">
-              {ind.technology.map((t) => (
-                <li key={t.title} className="flex gap-3">
-                  <span className="mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-blue/20 text-brand-sky"><Check className="h-3 w-3" /></span>
-                  <div>
-                    <strong className="block text-sm font-semibold">{t.title}</strong>
-                    <span className="text-sm leading-relaxed text-fg-soft">{t.desc}</span>
+                    <strong className="block text-[17px] font-medium text-fg">{c.title}</strong>
+                    <span className="mt-1 block text-[15px] leading-relaxed text-fg-soft">{c.desc}</span>
                   </div>
                 </li>
               ))}
             </ul>
+          </div>
+          <Reveal delay={0.1} className="lg:col-span-5">
+            <div className="notch-tr bg-brand-navy p-8 text-white sm:p-10 lg:sticky lg:top-28">
+              <p className="t-micro text-white/60">Technology requirements</p>
+              <h2 className="t-h3 mt-3 text-white">What the build must handle</h2>
+              <ul className="mt-6 space-y-5">
+                {ind.technology.map((t) => (
+                  <li key={t.title} className="flex gap-3">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#7FA8FF]" />
+                    <div>
+                      <strong className="block text-[15px] font-medium text-white">{t.title}</strong>
+                      <span className="mt-0.5 block text-sm leading-relaxed text-white/75">{t.desc}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </Reveal>
         </div>
       </section>
 
-      {/* HOW WE HELP */}
-      <section className="border-b border-line bg-surface py-20 sm:py-28">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <Eyebrow>How we help</Eyebrow>
-          <SplitHeading text="A simple path from audit to results" className="mt-4 mb-14 font-display text-3xl font-bold sm:text-5xl" />
-          <ol className="relative space-y-10 border-l border-line-strong pl-8">
+      {/* How we help */}
+      <section className="section-y border-b border-line bg-canvas">
+        <div className="container-x">
+          <SectionHead eyebrow="How we help" title="A simple path from audit to results" accent="results" />
+          <ol className="mt-14 grid gap-x-8 gap-y-10 border-t border-line-strong pt-10 sm:grid-cols-2 lg:grid-cols-4">
             {ind.howWeHelp.map((s, i) => (
-              <motion.li
-                key={s.title}
-                initial={{ opacity: 0, x: -16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={viewport}
-                transition={{ duration: 0.7, delay: i * 0.06, ease: EASE }}
-                className="relative"
-              >
-                <span className="absolute -left-[41px] grid h-5 w-5 place-items-center rounded-full border border-brand-blue bg-ink font-mono text-[10px] text-brand-sky">{i + 1}</span>
-                <h3 className="font-display text-xl font-semibold">{s.title}</h3>
-                <p className="mt-2 max-w-2xl leading-relaxed text-fg-soft">{s.desc}</p>
-              </motion.li>
+              <Reveal as="li" key={s.title} delay={i * 0.06}>
+                  <span className="serif-accent text-4xl leading-none text-brand-blue">{String(i + 1).padStart(2, '0')}</span>
+                  <h3 className="t-h3 mt-4 text-fg">{s.title}</h3>
+                  <p className="mt-2 text-[15px] leading-relaxed text-fg-soft">{s.desc}</p>
+                </Reveal>
             ))}
           </ol>
+
+          {proof && (
+            <Reveal className="mt-16">
+              <Link to={proof.path} className="group flex flex-col gap-6 rounded-[var(--radius-lg)] border border-line bg-surface p-7 transition-colors hover:border-line-strong sm:flex-row sm:items-center sm:p-9">
+                <img
+                  src={proof.shots.desktop[0]}
+                  alt={`${proof.name} website`}
+                  loading="lazy"
+                  className="aspect-[16/10] w-full rounded-[var(--radius-md)] border border-line object-cover object-top sm:w-64"
+                />
+                <div className="flex-1">
+                  <p className="t-micro text-brand-sky">We have built in this sector</p>
+                  <p className="t-h3 mt-2 text-fg"><span className="link-underline">{proof.name}</span></p>
+                  <p className="mt-2 text-[15px] leading-relaxed text-fg-soft">{proof.tagline}</p>
+                </div>
+                <ArrowUpRight className="h-5 w-5 shrink-0 text-fg-muted transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-blue" />
+              </Link>
+            </Reveal>
+          )}
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="border-b border-line py-20 sm:py-28">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
+      <section className="section-y border-b border-line bg-surface">
+        <div className="container-x grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <Eyebrow>FAQ</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl font-bold sm:text-4xl">Questions we hear often</h2>
+            <SectionHead eyebrow="FAQ" title="Questions we hear often" />
           </div>
           <div className="lg:col-span-8"><Accordion items={ind.faqs} /></div>
         </div>
       </section>
 
-      {/* RELATED SERVICES */}
-      <section className="border-b border-line py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Eyebrow>Related services</Eyebrow>
-          <div className="mt-6 flex flex-wrap gap-3">
-            {related.map((s) => (
-              <Link key={s} to={`/services/${s}`} className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-white/[0.03] px-4 py-2 text-sm text-fg-soft transition-colors hover:border-brand-blue/60 hover:text-fg">
-                {SERVICE_LABELS[s]} <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-            ))}
+      {/* Related */}
+      <section className="border-b border-line bg-canvas py-16 sm:py-20">
+        <div className="container-x grid gap-12 lg:grid-cols-2">
+          <div>
+            <p className="t-micro text-fg-muted">Related services</p>
+            <ul className="mt-5 flex flex-wrap gap-2.5">
+              {related.map((s) => (
+                <li key={s}>
+                  <Link to={`/services/${s}`} className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface px-4 py-2 text-sm text-fg transition-colors hover:border-fg">
+                    {SERVICE_LABELS[s]} <ArrowUpRight className="h-3.5 w-3.5 text-fg-muted" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-fg-muted">
-            <span>Other industries:</span>
-            {others.map((o) => (
-              <Link key={o.slug} to={`/industries/${o.slug}`} className="text-fg-soft hover:text-brand-sky">{o.shortName}</Link>
-            ))}
-            <Link to="/industries" className="text-brand-sky">View all</Link>
+          <div>
+            <p className="t-micro text-fg-muted">Other industries</p>
+            <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2.5">
+              {others.map((o) => (
+                <li key={o.slug}>
+                  <Link to={`/industries/${o.slug}`} className="link-underline text-[15px] text-fg-soft hover:text-fg">{o.shortName}</Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="relative overflow-hidden py-24 sm:py-32">
-        <div className="absolute left-1/2 top-1/2 h-[420px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-blue/15 blur-[120px]" aria-hidden="true" />
-        <Reveal className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <h2 className="font-display text-3xl font-bold sm:text-5xl">Let&rsquo;s talk about your {ind.shortName.toLowerCase()} goals.</h2>
-          <p className="mx-auto mt-5 max-w-xl text-fg-soft">Tell us where you are and what you want to change. We will reply with an honest view of what is realistic.</p>
-          <div className="mt-9"><Button to="/contact">Start a conversation</Button></div>
-        </Reveal>
-      </section>
+      <FinalCTA
+        heading={`Let's talk about your ${ind.shortName.toLowerCase()} goals.`}
+        accent="goals."
+        body="Tell us where you are and what you want to change. We will reply with an honest view of what is realistic."
+      />
     </div>
   );
 };

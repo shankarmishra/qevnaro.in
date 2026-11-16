@@ -1,60 +1,42 @@
 import React from 'react';
 import { Hero } from '../components/Hero';
-import { CapabilityStrip } from '../components/CapabilityStrip';
-import { TrustEcosystemStrip } from '../components/common/TrustEcosystemStrip';
-import { AgencyIntro } from '../components/AgencyIntro';
-import { ServicesMatrixSection } from '../components/services/ServicesMatrixSection';
-import { FeaturedWorkSection } from '../components/FeaturedWorkSection';
-import { WhyChooseQevnaro } from '../components/WhyChooseQevnaro';
-import { IndustriesSection } from '../components/IndustriesSection';
-import { ProcessSection } from '../components/ProcessSection';
-import { GrowthEstimatorWidget } from '../components/growth/GrowthEstimatorWidget';
-import { TestimonialsSection } from '../components/TestimonialsSection';
-import { InsightsPreviewSection } from '../components/InsightsPreviewSection';
-import { HomeFAQSection } from '../components/HomeFAQSection';
-import { FinalCTASection } from '../components/FinalCTASection';
+import { ProofStrip } from '../components/home/ProofStrip';
+import { Manifesto } from '../components/home/Manifesto';
+import { ServicesBento } from '../components/home/ServicesBento';
+import { WorkGallery } from '../components/home/WorkGallery';
+import { WhySection } from '../components/home/WhySection';
+import { IndustriesSection } from '../components/home/IndustriesSection';
+import { ProcessSection } from '../components/home/ProcessSection';
+import { InsightsSection } from '../components/home/InsightsSection';
+import { FAQSection } from '../components/home/FAQSection';
+import { FinalCTA } from '../components/home/FinalCTA';
 import { SEO } from '../components/ui/SEO';
-
-const JSON_LD = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Qevnaro',
-    url: 'https://qevnaro.in',
-    logo: 'https://qevnaro.in/logo-qevnaro.png',
-    description:
-      'Qevnaro is a technology, creative and digital growth partner: web and app development, branding, SEO and GEO, performance marketing and AI automation.',
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'Qevnaro',
-    url: 'https://qevnaro.in',
-  },
-];
+import { VelocityMarquee } from '../components/ui/Motion';
+import { organizationSchema, websiteSchema } from '../lib/schema';
 
 export const Home: React.FC = () => (
   <>
     <SEO
-      title="Qevnaro — Technology, Creative & Digital Growth Agency"
-      description="Qevnaro helps businesses build websites and apps, strengthen their brand, grow search and social visibility, and automate operations with AI."
+      title="Qevnaro | Web Development, Digital Marketing & AI Automation Agency in India"
+      description="Qevnaro is a technology and digital growth agency in Noida and Bengaluru. We build websites and apps, run SEO, GEO and paid campaigns, and automate operations with AI."
       path="/"
-      jsonLd={JSON_LD}
+      jsonLd={[organizationSchema(), websiteSchema()]}
     />
     <Hero />
-    <CapabilityStrip />
-    <TrustEcosystemStrip />
-    <div id="intro" className="scroll-mt-20"><AgencyIntro /></div>
-    <ServicesMatrixSection />
-    <FeaturedWorkSection />
-    <WhyChooseQevnaro />
+    <ProofStrip />
+    <VelocityMarquee
+      items={['Websites', 'Mobile apps', 'E-commerce', 'SEO & GEO', 'Performance marketing', 'Branding', 'AI automation']}
+      className="border-b border-line bg-canvas py-8 font-display text-[clamp(3rem,9vw,8.5rem)] font-medium leading-none tracking-[-0.045em] text-fg"
+    />
+    <Manifesto />
+    <ServicesBento />
+    <WorkGallery />
+    <WhySection />
     <IndustriesSection />
     <ProcessSection />
-    <GrowthEstimatorWidget />
-    <TestimonialsSection />
-    <InsightsPreviewSection />
-    <HomeFAQSection />
-    <FinalCTASection />
+    <InsightsSection />
+    <FAQSection />
+    <FinalCTA />
   </>
 );
 

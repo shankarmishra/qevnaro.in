@@ -1,133 +1,91 @@
-import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Reveal, SplitHeading, Eyebrow } from '../components/ui/Reveal';
-import { Breadcrumbs } from '../components/ui/Breadcrumbs';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { Reveal } from '../components/ui/Reveal';
+import { PageHero } from '../components/ui/PageHero';
+import { BrowserFrame, PhoneFrame } from '../components/ui/DeviceFrame';
 import { SEO } from '../components/ui/SEO';
+import { FinalCTA } from '../components/home/FinalCTA';
 import { projects } from '../lib/projects';
-import { EASE } from '../lib/motion';
+import { site } from '../lib/site';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Qevnaro work',
+  url: `${site.url}/work`,
+  hasPart: projects.map((p) => ({ '@type': 'CreativeWork', name: p.name, url: site.url + p.path, description: p.tagline })),
+};
 
 export function Work() {
-  const industries = useMemo(() => ['All', ...Array.from(new Set(projects.map((p) => p.industry)))], []);
-  const [active, setActive] = useState('All');
-  const shown = projects.filter((p) => active === 'All' || p.industry === active);
-
   return (
-    <div className="bg-ink text-fg">
+    <div className="bg-canvas text-fg">
       <SEO
-        title="Our Work"
-        description="Selected Qevnaro projects across healthcare and hospitality: web platforms, product design and engineering."
+        title="Our Work: Live Products Designed and Built by Qevnaro"
+        description="Case studies of products Qevnaro designed and built end to end: Pulse n Care, a home-nursing and teleconsultation platform, and MenusQR, a QR menu and ordering platform."
         path="/work"
+        jsonLd={jsonLd}
       />
 
-      <section className="relative overflow-hidden border-b border-line pt-36 pb-16 sm:pt-44 sm:pb-20">
-        <div className="bg-grid absolute inset-0" aria-hidden="true" />
-        <div className="pointer-events-none absolute -top-40 right-0 h-[480px] w-[480px] max-w-full rounded-full bg-brand-blue/15 blur-[140px]" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Breadcrumbs items={[{ label: 'Work' }]} />
-          <Eyebrow>Selected work</Eyebrow>
-          <SplitHeading as="h1" text="Products we have designed and built." className="mt-4 max-w-4xl font-display text-4xl font-bold leading-[1.08] text-gradient sm:text-5xl lg:text-6xl" />
-          <Reveal delay={0.2}>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-fg-soft">
-              A small, honest selection. Each project below is live, and each case study explains what the problem was and how we approached it.
-            </p>
-          </Reveal>
-        </div>
-      </section>
+      <PageHero
+        crumbs={[{ label: 'Work' }]}
+        eyebrow="Selected work"
+        title="Products we designed and built."
+        accent="built."
+        lead="A small, honest selection. Each project below is live, and each case study explains what the problem was and how we approached it."
+      />
 
-      <section className="py-14 sm:py-20 overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Horizontal Scrollable Filter Tabs with Double-Edge Fade on Mobile */}
-          <div className="relative mb-10">
-            <div className="mask-fade-x -mx-4 overflow-x-auto px-4 py-2 sm:mx-0 sm:px-0 no-scrollbar">
-              <div
-                role="group"
-                aria-label="Filter by industry"
-                className="glass-dock inline-flex gap-1.5 rounded-full p-1.5"
-              >
-                {industries.map((i) => {
-                  const on = active === i;
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      aria-pressed={on}
-                      onClick={() => setActive(i)}
-                      className={`relative z-10 whitespace-nowrap rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
-                        on ? 'text-white' : 'text-fg-soft hover:text-white'
-                      }`}
-                    >
-                      {on && (
-                        <motion.span
-                          layoutId="work-filter-pill"
-                          className="absolute inset-0 -z-10 rounded-full bg-brand-blue glow-pill-active"
-                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        />
-                      )}
-                      <span>{i}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+      <section className="bg-canvas">
+        {projects.map((p, i) => (
+          <article key={p.slug} className="border-b border-line">
+            <div className={`container-x grid items-center gap-12 py-20 sm:py-28 lg:grid-cols-12 lg:gap-16`}>
+              <Reveal className={`lg:col-span-7 ${i % 2 ? 'lg:order-2' : ''}`}>
+                <Link to={p.path} aria-label={`${p.name} case study`} className="group relative block pb-10 pl-8 sm:pl-14">
+                  <BrowserFrame
+                    src={p.shots.desktop[0]}
+                    alt={`${p.name} website, home page`}
+                    url={p.host}
+                    eager={i === 0}
+                    className="transition-transform duration-700 group-hover:-translate-y-1.5"
+                  />
+                  <PhoneFrame
+                    src={p.shots.mobile}
+                    alt={`${p.name} on a phone`}
+                    className="absolute bottom-0 left-0 w-[24%] min-w-[92px] max-w-[190px] transition-transform duration-700 group-hover:-translate-y-3"
+                  />
+                </Link>
+              </Reveal>
 
-          <motion.div layout className="grid gap-6 md:grid-cols-2">
-            <AnimatePresence mode="popLayout">
-              {shown.map((p) => (
-                <motion.article
-                  layout
-                  key={p.slug}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
-                  transition={{ duration: 0.5, ease: EASE }}
-                  className="group relative overflow-hidden rounded-[var(--radius-lg)] border border-line bg-surface transition-colors focus-within:border-brand-blue/60 hover:border-brand-blue/50"
-                >
-                  <Link to={p.path} className="block focus:outline-none" aria-label={`${p.name} case study`}>
-                    <div className="relative aspect-[16/10] overflow-hidden bg-elevated">
-                      <img
-                        src={p.cover}
-                        alt={p.coverAlt}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 group-focus-within:scale-105 motion-reduce:transition-none"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent" aria-hidden="true" />
-                      <div className="absolute inset-x-0 bottom-0 translate-y-3 p-5 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 motion-reduce:transition-none">
-                        <p className="text-xs uppercase tracking-[0.18em] text-brand-sky">Delivered</p>
-                        <p className="mt-1 text-sm text-fg">{p.services.slice(0, 4).join(' · ')}</p>
-                      </div>
-                    </div>
-                    <div className="p-6 sm:p-7">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="font-mono text-xs text-brand-sky">{p.industry} · {p.category}</span>
-                        <ArrowUpRight className="h-5 w-5 text-fg-muted transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
-                      </div>
-                      <h2 className="mt-3 font-display text-2xl font-bold">{p.name}</h2>
-                      <p className="mt-2 leading-relaxed text-fg-soft">{p.tagline}</p>
-                      <ul className="mt-5 flex flex-wrap gap-2">
-                        {p.services.slice(0, 3).map((s) => (
-                          <li key={s} className="rounded-full border border-line px-3 py-1 text-xs text-fg-muted">{s}</li>
-                        ))}
-                      </ul>
-                    </div>
+              <Reveal delay={0.1} className="lg:col-span-5">
+                <div className="flex items-center gap-4">
+                  <span className="serif-accent text-5xl leading-none text-brand-blue">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="h-px w-10 bg-line-strong" />
+                  <span className="t-micro text-fg-muted">{p.industry} · {p.category}</span>
+                </div>
+                <h2 className="t-h1 mt-6 text-fg">{p.name}</h2>
+                <p className="t-lead mt-4 text-fg-soft">{p.tagline}</p>
+                <p className="mt-4 text-[15px] leading-relaxed text-fg-muted">{p.intro}</p>
+                <ul className="mt-6 flex flex-wrap gap-2">
+                  {p.services.map((s) => (
+                    <li key={s} className="rounded-full border border-line-strong px-3.5 py-1.5 text-[13px] text-fg-soft">{s}</li>
+                  ))}
+                </ul>
+                <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3">
+                  <Link to={p.path} className="group inline-flex items-center gap-2 text-[15px] font-medium text-fg">
+                    <span className="link-underline">Read the case study</span>
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
-                </motion.article>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        </div>
+                  <a href={p.liveUrl} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-1.5 text-[15px] text-fg-muted hover:text-fg">
+                    <span className="link-underline">{p.host}</span>
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </Reveal>
+            </div>
+          </article>
+        ))}
       </section>
 
-      <section className="border-t border-line bg-surface py-20 text-center sm:py-28">
-        <div className="mx-auto max-w-2xl px-4">
-          <h2 className="font-display text-3xl font-bold sm:text-4xl">Your project could be next.</h2>
-          <p className="mt-4 text-fg-soft">Tell us what you want to build and we will reply with an honest view of how we would do it.</p>
-          <div className="mt-8 flex justify-center"><Button to="/contact">Start a project</Button></div>
-        </div>
-      </section>
+      <FinalCTA heading="Your project could be next." accent="next." body="Tell us what you want to build and we will reply with an honest view of how we would do it." />
     </div>
   );
 }

@@ -1,14 +1,15 @@
-import { useEffect } from 'react';
-
-const SITE = 'https://qevnaro.in';
+import { useContext, useEffect } from 'react';
+import { HeadContext, type HeadData } from '../../lib/head';
+import { site } from '../../lib/site';
 
 interface Props {
   title: string;
   description: string;
   path?: string;
   image?: string;
-  jsonLd?: object | object[];
+  jsonLd?: object | object[] | null;
   noindex?: boolean;
+  type?: 'website' | 'article';
 }
 
 function setMeta(attr: 'name' | 'property', key: string, value: string) {
@@ -21,20 +22,57 @@ function setMeta(attr: 'name' | 'property', key: string, value: string) {
   el.setAttribute('content', value);
 }
 
-/** Lightweight per-route head manager (no extra dependency). */
-export const SEO = ({ title, description, path, image = '/assets/images/og-image.webp', jsonLd, noindex }: Props) => {
+/** Social image per page type, unless a page passes its own. */
+const defaultImage = (p: string) =>
+  p.startsWith('/services') || p.startsWith('/industries') || p === '/pricing' || p === '/process'
+    ? '/og/services.jpg'
+    : p.startsWith('/work')
+      ? '/og/work.jpg'
+      : p.startsWith('/insights') || p === '/glossary'
+        ? '/og/insights.jpg'
+        : p.startsWith('/locations') || p.startsWith('/global')
+          ? '/og/locations.jpg'
+          : '/og/home.jpg';
+
+const build = ({ title, description, path, image, jsonLd, noindex, type = 'website' }: Props): HeadData => {
+  const p = path ?? (typeof window !== 'undefined' ? window.location.pathname : '/');
+  image = image ?? defaultImage(p);
+  return {
+    title: title.includes('Qevnaro') ? title : `${title} | Qevnaro`,
+    description,
+    canonical: site.url + (p === '/' ? '/' : p.replace(/\/$/, '')),
+    image: image.startsWith('http') ? image : site.url + image,
+    robots: noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large',
+    type,
+    jsonLd: (Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : []).filter(Boolean) as object[],
+  };
+};
+
+/**
+ * Per-route head manager. During the build-time render it hands the head data to the
+ * prerenderer (so every page ships its own title, canonical, Open Graph and JSON-LD in
+ * static HTML); in the browser it keeps document.head in sync on navigation.
+ */
+export const SEO = (props: Props) => {
+  const collector = useContext(HeadContext);
+  const head = build(props);
+  if (collector) collector.head = head;
+
+  const key = JSON.stringify(head);
   useEffect(() => {
-    const full = title.includes('Qevnaro') ? title : `${title} | Qevnaro`;
-    document.title = full;
-    const url = SITE + (path ?? window.location.pathname);
-    setMeta('name', 'description', description);
-    setMeta('name', 'robots', noindex ? 'noindex,nofollow' : 'index,follow');
-    setMeta('property', 'og:title', full);
-    setMeta('property', 'og:description', description);
-    setMeta('property', 'og:type', 'website');
-    setMeta('property', 'og:url', url);
-    setMeta('property', 'og:image', SITE + image);
+    const h: HeadData = JSON.parse(key);
+    document.title = h.title;
+    setMeta('name', 'description', h.description);
+    setMeta('name', 'robots', h.robots);
+    setMeta('property', 'og:type', h.type);
+    setMeta('property', 'og:title', h.title);
+    setMeta('property', 'og:description', h.description);
+    setMeta('property', 'og:url', h.canonical);
+    setMeta('property', 'og:image', h.image);
     setMeta('name', 'twitter:card', 'summary_large_image');
+    setMeta('name', 'twitter:title', h.title);
+    setMeta('name', 'twitter:description', h.description);
+    setMeta('name', 'twitter:image', h.image);
 
     let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!link) {
@@ -42,17 +80,16 @@ export const SEO = ({ title, description, path, image = '/assets/images/og-image
       link.rel = 'canonical';
       document.head.appendChild(link);
     }
-    link.href = url;
+    link.href = h.canonical;
 
-    document.getElementById('route-jsonld')?.remove();
-    if (jsonLd) {
+    document.head.querySelectorAll('script[data-route-jsonld]').forEach((n) => n.remove());
+    h.jsonLd.forEach((j) => {
       const s = document.createElement('script');
       s.type = 'application/ld+json';
-      s.id = 'route-jsonld';
-      s.textContent = JSON.stringify(jsonLd);
+      s.setAttribute('data-route-jsonld', '');
+      s.textContent = JSON.stringify(j);
       document.head.appendChild(s);
-    }
-    return () => document.getElementById('route-jsonld')?.remove();
-  }, [title, description, path, image, jsonLd, noindex]);
+    });
+  }, [key]);
   return null;
 };

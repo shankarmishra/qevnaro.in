@@ -1,3 +1,6 @@
+import { EXTRA_INSIGHTS } from './insightsExtra';
+import { EARLIER_SERVICES, MORE_INSIGHTS } from './insightsMore';
+
 export type InsightCategory =
   | 'Web Development'
   | 'App Development'
@@ -35,9 +38,13 @@ export interface Insight {
   category: InsightCategory;
   author: string;
   date: string; // ISO
+  /** ISO date of the last substantive edit, when different from `date`. */
+  updated?: string;
   readingMinutes: number;
   featured?: boolean;
   related?: string[];
+  /** Service pages this article supports; they link back to it. */
+  services?: string[];
   blocks: InsightBlock[];
 }
 
@@ -353,7 +360,8 @@ const raw: Omit<Insight, 'readingMinutes'>[] = [
   },
 ];
 
-export const INSIGHTS: Insight[] = raw
+export const INSIGHTS: Insight[] = [...raw, ...EXTRA_INSIGHTS, ...MORE_INSIGHTS]
+  .map((a) => ({ ...a, services: a.services ?? EARLIER_SERVICES[a.slug] }))
   .map((a) => ({ ...a, readingMinutes: Math.max(3, Math.round(wordsOf(a.blocks) / 220)) }))
   .sort((a, b) => b.date.localeCompare(a.date));
 
